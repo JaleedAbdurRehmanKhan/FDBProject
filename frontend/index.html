@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BMS | DB Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Outfit:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="/static/dashboard.css">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/viz.js/2.1.2/viz.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/viz.js/2.1.2/full.render.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="background-effects">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+
+    <main class="dashboard">
+        <header class="header">
+            <h1>Battery Management System (BMS)</h1>
+            <p>Relational Database Architecture — Enhanced Entity-Relationship (EER) Model</p>
+            <div class="badges">
+                <span class="badge">Chen Notation</span>
+                <span class="badge">3rd Normal Form</span>
+            </div>
+        </header>
+
+        <!-- TABS NAVIGATION -->
+        <div class="tabs-container">
+            <button class="tab-btn active" data-target="tab-eer">1. Architecture (EER)</button>
+            <button class="tab-btn" data-target="tab-faults">2. Teacher Simulator</button>
+            <button class="tab-btn" data-target="tab-telemetry">3. Live Data Monitor</button>
+        </div>
+
+        <!-- TAB 1: EER DIAGRAM -->
+        <div id="tab-eer" class="tab-content active">
+            <section class="diagram-container glass-panel">
+                <div id="graph-output" class="graph-viewport">
+                    <div class="loader">Rendering EER Model...</div>
+                </div>
+            </section>
+
+            <section class="database-summary glass-panel">
+                <h2>Design Highlights</h2>
+                <div class="summary-grid">
+                    <div class="card">
+                        <h3>Hierarchy (Specialization)</h3>
+                        <p>The Battery superclass explicitly maps to three child entities (LFP, NMC, LTO) using disjoint constraints.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Time-Series Tracking</h3>
+                        <p>The Sensor_Reading acts as a weak entity handling millions of high-frequency records, preserving 3NF rules.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Fault Anomalies</h3>
+                        <p>The Fault_Log table is populated exclusively via backend SQL Triggers monitoring the data streams.</p>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+
+        <!-- TAB 2: SIMULATOR & FAULTS -->
+        <div id="tab-faults" class="tab-content">
+            <section class="simulation-console glass-panel">
+                <h2>🎓 Live Demonstration Simulator</h2>
+                <p>Use these controls to interact with the Python Backend and SQLite Database.</p>
+                <div class="sim-actions">
+                    <button id="btn-inject-fault" class="btn primary-btn">
+                        <span class="icon">⚡</span> Test Trigger: Inject Over-Voltage Anomaly
+                    </button>
+                    <button id="btn-inject-soc-fault" class="btn warning-btn">
+                        <span class="icon">🔋</span> Test Trigger: Inject Critical SOC (0%)
+                    </button>
+                    <button id="btn-inject-temp-fault" class="btn" style="background-color: #ef4444; color: white;">
+                        <span class="icon">🔥</span> Test Trigger: Inject Critical Temp (75°C)
+                    </button>
+                    <button id="btn-run-diagnostics" class="btn secondary-btn">
+                        <span class="icon">🛠️</span> Test Procedure: Run Battery Diagnostics
+                    </button>
+                    <button id="btn-reset-db" class="btn reset-btn">
+                        <span class="icon">🔄</span> Reset Presentation Database
+                    </button>
+                </div>
+                <div id="sim-response" class="sim-response-box">Awaiting command...</div>
+            </section>
+
+            <section class="data-monitor glass-panel">
+                <h2>📡 Fault Log (Populated via SQL Triggers)</h2>
+                <div class="table-container">
+                    <table id="fault-table">
+                        <thead>
+                            <tr>
+                                <th>Fault ID</th>
+                                <th>Battery</th>
+                                <th>Severity</th>
+                                <th>Description</th>
+                                <th>Timestamp</th>
+                            </tr>
+                        </thead>
+                        <tbody id="fault-table-body">
+                            <!-- Filled by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+
+        <!-- TAB 3: LIVE TELEMETRY -->
+        <div id="tab-telemetry" class="tab-content">
+
+            <!-- SQL VIEW TABLE -->
+            <section class="glass-panel view-section">
+                <div class="view-header">
+                    <div>
+                        <h2>🗂️ Live Battery Status <span class="view-badge">SQL VIEW</span></h2>
+                        <p class="view-desc">Powered by <code>View_Live_Battery_Status</code> — joins Battery + Vehicle + Sensor_Reading in one query</p>
+                    </div>
+                    <div id="view-stats" class="view-stats-pill"></div>
+                </div>
+                <div class="table-container">
+                    <table id="view-battery-table">
+                        <thead>
+                            <tr>
+                                <th>Battery ID</th>
+                                <th>Owner</th>
+                                <th>Chemistry</th>
+                                <th>SOH (%)</th>
+                                <th>SOC (%)</th>
+                                <th>Voltage (V)</th>
+                                <th>Temp (°C)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="battery-cards-grid">
+                            <tr><td colspan="7" style="text-align:center; color:#94a3b8">Loading from SQL View...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- SENSOR FEED -->
+            <section class="telemetry-monitor glass-panel" style="margin-top:1.5rem">
+                <h2>📊 Real-Time SQLite Sensor Feed</h2>
+                <p>Displays the latest joined data streams flowing into the Weak Entity tables.</p>
+                <div class="chart-container" style="position: relative; height:35vh; width:100%; margin-top: 20px; background: rgba(0,0,0,0.2); border-radius: 12px; padding: 15px; border: 1px solid rgba(255,255,255,0.05);">
+                    <canvas id="telemetryChart"></canvas>
+                </div>
+                <div class="table-container" style="margin-top:20px;">
+                    <table id="telemetry-table">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Chem</th>
+                                <th>Voltage (V)</th>
+                                <th>Current (A)</th>
+                                <th>Temp (°C)</th>
+                                <th>SOC (%)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="telemetry-table-body">
+                            <!-- Filled by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+
+    </main>
+
+    <script src="/static/eer_diagram.js?v=2"></script>
+    <script src="/static/dashboard.js?v=2"></script>
+</body>
+</html>

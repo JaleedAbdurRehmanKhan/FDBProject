@@ -1,0 +1,26 @@
+Battery_ID,Unit_ID,Manufacturer,Manufacture_Date,Capacity_kWh,Chemistry_Type,Current_SOH,Cobalt_Percentage,Max_Voltage_Limit,Thermal_Runaway_Threshold,Extreme_Cold_Tolerance_Limit
+B-001,V-001,Tesla,2022-06-18,50,LFP,98.79,,3.65,270.0,
+B-002,V-002,Contemporary Amperex,2023-02-27,150,NMC,98.63,24.9,4.2,,
+B-003,V-003,Tesla,2023-01-19,100,LFP,91.92,,3.65,270.0,
+B-004,V-004,LG Chem,2023-04-17,100,LTO,89.67,,2.85,,-30.0
+B-005,V-005,BYD,2022-05-01,100,LFP,87.33,,3.65,270.0,
+B-006,V-006,LG Chem,2021-11-08,100,LTO,97.32,,2.85,,-30.0
+B-007,V-007,LG Chem,2022-12-08,100,NMC,97.05,30.36,4.2,,
+B-008,V-008,Contemporary Amperex,2023-07-16,150,NMC,85.17,31.45,4.2,,
+B-009,V-009,Panasonic,2023-06-12,100,NMC,86.38,18.23,4.2,,
+B-010,V-010,Contemporary Amperex,2023-05-06,150,LTO,89.67,,2.85,,-30.0
+B-011,V-011,Panasonic,2022-02-23,100,LTO,95.3,,2.85,,-30.0
+B-012,V-012,LG Chem,2023-07-14,75,NMC,97.2,23.23,4.2,,
+B-013,V-013,LG Chem,2022-12-24,50,LFP,99.6,,3.65,270.0,
+B-014,V-014,Contemporary Amperex,2023-11-15,150,NMC,94.47,12.04,4.2,,
+B-015,V-015,Tesla,2023-05-05,50,LTO,88.07,,2.85,,-30.0
+B-016,V-016,Contemporary Amperex,2023-11-17,75,LTO,93.68,,2.85,,-30.0
+B-017,V-017,Contemporary Amperex,2022-07-14,150,LFP,93.27,,3.65,270.0,
+B-018,V-018,Contemporary Amperex,2023-02-16,100,LTO,99.49,,2.85,,-30.0
+B-019,V-019,Contemporary Amperex,2023-01-19,150,NMC,87.31,30.18,4.2,,
+B-020,V-020,Tesla,2022-11-03,100,LTO,89.11,,2.85,,-30.0
+B-021,V-021,LG Chem,2022-03-03,150,LFP,86.65,,3.65,270.0,
+B-022,V-022,BYD,2023-09-29,50,LFP,97.61,,3.65,270.0,
+B-023,V-023,Contemporary Amperex,2021-12-19,100,NMC,93.49,15.01,4.2,,
+B-024,V-024,Panasonic,2023-06-16,75,LTO,98.37,,2.85,,-30.0
+B-025,V-025,Tesla,2023-09-25,75,LTO,85.31,,2.85,,-30.0

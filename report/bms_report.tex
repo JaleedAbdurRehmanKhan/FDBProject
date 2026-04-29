@@ -1,0 +1,832 @@
+%% ============================================================
+%%  Smart Battery Management System — Database Fundamentals CEP
+%%  Paste into Overleaf and compile with pdfLaTeX
+%% ============================================================
+
+\documentclass[12pt, a4paper]{report}
+
+%% ── Packages ─────────────────────────────────────────────────
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[margin=1in]{geometry}
+\usepackage{setspace}
+\usepackage{parskip}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{caption}
+\usepackage{amsmath}
+\usepackage{tocloft}
+
+%% ── Hyperlink Colours ────────────────────────────────────────
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!70!black,
+    citecolor=blue!70!black,
+    urlcolor=blue!70!black
+}
+
+%% ── SQL Listing Style ────────────────────────────────────────
+\definecolor{codegreen}{rgb}{0.13,0.55,0.13}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codeblue}{rgb}{0.0,0.0,0.8}
+\definecolor{backcolour}{rgb}{0.97,0.97,0.97}
+
+\lstdefinestyle{sqlstyle}{
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegray}\itshape,
+    keywordstyle=\color{codeblue}\bfseries,
+    stringstyle=\color{codegreen},
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single,
+    rulecolor=\color{gray!30},
+    numbers=left,
+    numberstyle=\tiny\color{codegray},
+    tabsize=4,
+    language=SQL,
+    morekeywords={TRIGGER,AFTER,WHEN,BEGIN,END,AUTOINCREMENT,PRAGMA,VIEW,IF,NOT,EXISTS,REAL,TEXT,INTEGER,DATE,DATETIME}
+}
+
+\lstset{style=sqlstyle}
+
+%% ── Section Formatting ───────────────────────────────────────
+\titleformat{\chapter}[block]
+  {\normalfont\Large\bfseries}{Chapter \thechapter:}{0.5em}{}
+\titlespacing*{\chapter}{0pt}{10pt}{15pt}
+
+%% ── Header / Footer ──────────────────────────────────────────
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{Smart Battery Management System — CEP}
+\lhead{\leftmark}
+\rfoot{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+%% ── Line Spacing ─────────────────────────────────────────────
+\onehalfspacing
+
+%% ============================================================
+\begin{document}
+
+%% ── TITLE PAGE (left to student) ─────────────────────────────
+%% Insert your university title page here or use \maketitle.
+
+\newpage
+
+%% ============================================================
+%%  CHAPTER 2 — TABLE OF CONTENTS
+%% ============================================================
+\tableofcontents
+\listoffigures        % remove if no figures added yet
+\listoftables         % remove if no tables added yet
+\newpage
+
+%% ============================================================
+%%  CHAPTER 3 — ABSTRACT
+%% ============================================================
+\chapter*{Abstract}
+\addcontentsline{toc}{chapter}{Abstract}
+
+Modern electric vehicles and energy-storage systems rely on Battery Management Systems (BMS) to ensure safe and efficient operation, yet traditional implementations handle fault detection entirely in application code, tightly coupling safety logic with hardware. This project designs and implements a full-stack Smart BMS underpinned by a rigorously normalised SQLite relational database to demonstrate how SQL triggers and stored-procedure logic can automate fault detection and charging-profile recommendation with zero application-layer intervention. A six-table schema was developed in Third Normal Form (3NF), guided by an Enhanced Entity-Relationship (EER) model in Chen notation that captures a disjoint specialisation hierarchy across three battery chemistries (NMC, LFP, LTO) and a weak-entity relationship for time-series sensor readings. Three SQL triggers were embedded in the database engine to autonomously detect over-voltage, over-temperature, and critical State-of-Charge anomalies, while a stored-procedure equivalent implemented in the Python backend automates safe charging-profile assignment for degraded batteries. A synthetic dataset of 10,000 sensor readings simulating 30 days of operation across 25 vehicles was used for validation. All anomalous readings were correctly detected and logged by the triggers without explicit application code, and the diagnostic procedure successfully flagged degraded batteries and enforced appropriate charging profiles. A real-time web dashboard visualises live telemetry, the fault log, and the SQL view output at three-second refresh intervals. The results confirm that a well-structured relational database, augmented with triggers and procedural logic, can serve as the analytical backbone of a safety-critical BMS, with design patterns directly transferable to production-grade platforms such as Oracle or PostgreSQL.
+
+\newpage
+
+%% ============================================================
+%%  CHAPTER 4 — INTRODUCTION
+%% ============================================================
+\chapter{Introduction}
+
+\section{Background}
+The proliferation of electric vehicles and grid-scale energy storage has made Battery Management Systems an integral component of modern power electronics. A BMS is responsible for monitoring individual cell parameters — voltage, current, temperature, and State of Charge (SOC) — and for taking protective action when these parameters exceed safe operating thresholds.
+
+Traditional BMS implementations handle fault detection and response entirely in firmware or embedded application code. While effective, this approach tightly couples safety logic with the sensing hardware, making it difficult to audit, extend, or analyse historically. A database-centric approach separates the concern of data storage and integrity enforcement from the application layer, allowing the RDBMS engine itself to act as the first line of defence through SQL triggers.
+
+\section{Project Overview}
+This Complex Engineering Problem (CEP) presents a full-stack Smart BMS solution comprising three architectural tiers:
+
+\begin{enumerate}[label=\textbf{\arabic*.}]
+    \item \textbf{Database Layer:} A SQLite relational database with a 3NF-normalised schema, three automatic fault-detection triggers, an analytical SQL view, and six interrelated tables.
+    \item \textbf{Backend Layer:} A Python-based REST API (FastAPI framework) that exposes the database through structured endpoints, runs a background sensor-data simulator, and implements stored-procedure equivalent logic for charging diagnostics.
+    \item \textbf{Frontend Layer:} A browser-based interactive dashboard that renders the EER model, provides a live demonstration simulator for classroom use, and displays real-time telemetry charts and a fault log — all refreshing automatically every three seconds.
+\end{enumerate}
+
+\section{Motivation}
+The motivation for this project is twofold. First, it addresses the academic requirement of demonstrating database programming constructs — triggers and stored procedures — in a meaningful, real-world context. Second, it models the kind of engineering problem that battery engineers at organisations such as Tesla, BYD, and CATL routinely solve: how to reliably store, query, and act upon millions of high-frequency sensor readings from heterogeneous battery chemistries.
+
+\section{Scope and Limitations}
+The scope of this project is limited to a software simulation environment. Physical battery hardware is not used; all sensor readings are synthetically generated to model realistic charging and discharging physics. The database engine used is SQLite, which does not natively support stored procedures; this limitation is documented and addressed in the procedural logic chapter.
+
+\newpage
+
+%% ============================================================
+%%  CHAPTER 5 — NOMENCLATURE
+%% ============================================================
+\chapter*{Nomenclature}
+\addcontentsline{toc}{chapter}{Nomenclature}
+
+\section*{Abbreviations}
+
+\begin{longtable}{@{} p{3cm} p{11cm} @{}}
+    \toprule
+    \textbf{Abbreviation} & \textbf{Definition} \\
+    \midrule
+    \endhead
+    BMS     & Battery Management System \\
+    EER     & Enhanced Entity-Relationship \\
+    SQL     & Structured Query Language \\
+    RDBMS   & Relational Database Management System \\
+    3NF     & Third Normal Form \\
+    1NF     & First Normal Form \\
+    2NF     & Second Normal Form \\
+    SOC     & State of Charge — the remaining charge in a battery expressed as a percentage of its total capacity \\
+    SOH     & State of Health — a measure of battery degradation expressed as a percentage of original capacity \\
+    NMC     & Nickel Manganese Cobalt — a lithium-ion battery chemistry \\
+    LFP     & Lithium Iron Phosphate — a lithium-ion battery chemistry \\
+    LTO     & Lithium Titanate Oxide — a lithium-ion battery chemistry \\
+    EV      & Electric Vehicle \\
+    API     & Application Programming Interface \\
+    REST    & Representational State Transfer \\
+    JSON    & JavaScript Object Notation \\
+    CRUD    & Create, Read, Update, Delete \\
+    FK      & Foreign Key \\
+    PK      & Primary Key \\
+    DDL     & Data Definition Language \\
+    DML     & Data Manipulation Language \\
+    CSV     & Comma-Separated Values \\
+    HTTP    & Hypertext Transfer Protocol \\
+    IoT     & Internet of Things \\
+    \bottomrule
+\end{longtable}
+
+\section*{Symbols and Units}
+
+\begin{longtable}{@{} p{3cm} p{11cm} @{}}
+    \toprule
+    \textbf{Symbol} & \textbf{Meaning} \\
+    \midrule
+    \endhead
+    $V$     & Voltage, measured in Volts (V) \\
+    $I$     & Current, measured in Amperes (A) \\
+    $T$     & Temperature, measured in degrees Celsius ($^\circ$C) \\
+    $Q$     & Capacity, measured in kilowatt-hours (kWh) \\
+    $V_{max}$ & Maximum allowable terminal voltage for a given battery chemistry \\
+    $T_{th}$ & Thermal runaway threshold temperature \\
+    \bottomrule
+\end{longtable}
+
+\section*{Key Database Terms}
+
+\begin{longtable}{@{} p{4cm} p{10cm} @{}}
+    \toprule
+    \textbf{Term} & \textbf{Definition} \\
+    \midrule
+    \endhead
+    Trigger         & A database object that automatically executes a predefined SQL action when a specified event (INSERT, UPDATE, DELETE) occurs on a table \\
+    View            & A stored SQL query that presents data from one or more tables as a virtual table \\
+    Weak Entity     & An entity that cannot be uniquely identified by its own attributes alone and depends on a related strong entity \\
+    Specialisation  & An EER concept where a superclass is divided into subclasses based on a distinguishing attribute (discriminator) \\
+    Disjoint        & A specialisation constraint specifying that an entity instance may belong to at most one subclass \\
+    Foreign Key     & An attribute in one table that references the primary key of another table, enforcing referential integrity \\
+    Normalisation   & The process of organising a relational schema to reduce redundancy and dependency anomalies \\
+    Stored Procedure & A precompiled set of SQL statements stored in the database and executed as a single callable unit \\
+    \bottomrule
+\end{longtable}
+
+\newpage
+
+%% ============================================================
+%%  CHAPTER 6 — THEORY AND CALCULATIONS
+%% ============================================================
+\chapter{Theory and Calculations}
+
+\section{Relational Database Theory}
+A relational database organises data into relations (tables) where each row represents a unique record (tuple) and each column represents an attribute. Data integrity is enforced through constraints, keys, and referential integrity rules. The relational model, formalised by E.F.~Codd in 1970, guarantees that data can be queried and manipulated using a declarative language (SQL) independent of physical storage.
+
+The three foundational rules of relational integrity applied in this project are:
+\begin{enumerate}
+    \item \textbf{Entity Integrity:} Every table must have a primary key, and no primary key value may be NULL.
+    \item \textbf{Referential Integrity:} A foreign key value must either match an existing primary key in the referenced table or be NULL.
+    \item \textbf{Domain Integrity:} All values in a column must conform to a defined domain (e.g., \texttt{SOC\_Percentage REAL CHECK (SOC\_Percentage >= 0 AND SOC\_Percentage <= 100)}).
+\end{enumerate}
+
+\section{Enhanced Entity-Relationship (EER) Model}
+The EER model extends the standard ER model by introducing specialisation, generalisation, and categorisation. In this project, the EER model was constructed in Chen notation and consists of the following entities and relationships:
+
+\begin{itemize}
+    \item \textbf{Vehicle} (strong entity) — represents the physical storage unit (EV, solar storage, grid backup).
+    \item \textbf{Battery} (superclass) — linked to Vehicle by a one-to-one relationship. Specialises into three disjoint subclasses: \textbf{NMC}, \textbf{LFP}, and \textbf{LTO}, determined by the discriminator attribute \texttt{Chemistry\_Type}.
+    \item \textbf{Sensor\_Reading} (weak entity) — depends existentially on Battery. Its partial key is \texttt{Reading\_ID}; it cannot be uniquely identified without its parent \texttt{Battery\_ID}.
+    \item \textbf{Fault\_Log} — populated exclusively by SQL triggers; records detected anomalies.
+    \item \textbf{Charging\_Profile} — a static lookup table of four charging strategies.
+    \item \textbf{Charge\_Recommendation} — a derived associative entity linking Battery to Charging\_Profile, created by the stored-procedure logic.
+\end{itemize}
+
+%% ── IMAGE PLACEHOLDER ────────────────────────────────────────
+%% ADD IMAGE HERE: Screenshot of the EER diagram from the dashboard (Tab 1).
+%% Steps: Take a screenshot of localhost:8000 → Tab 1 → save as "eer_diagram.png"
+%% Upload to Overleaf, then uncomment the lines below:
+%%
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.9\textwidth]{eer_diagram.png}
+    \caption{Enhanced Entity-Relationship (EER) Model of the Smart BMS in Chen Notation}
+    \label{fig:eer}
+\end{figure}
+
+\section{Database Normalisation}
+Normalisation is the process of structuring a relational schema to eliminate data redundancy and prevent update, insertion, and deletion anomalies. The schema was progressively normalised through three normal forms.
+
+\subsection{First Normal Form (1NF)}
+A relation is in 1NF if every attribute contains only atomic (indivisible) values and each row is unique. All six tables satisfy 1NF — no multi-valued attributes exist, and every table has a designated primary key.
+
+\subsection{Second Normal Form (2NF)}
+A relation in 1NF is in 2NF if every non-key attribute is fully functionally dependent on the entire primary key (no partial dependencies). Since all tables use single-column primary keys (\texttt{Battery\_ID}, \texttt{Reading\_ID}, etc.), partial dependency is structurally impossible and 2NF is trivially satisfied.
+
+\subsection{Third Normal Form (3NF)}
+A relation in 2NF is in 3NF if no non-key attribute is transitively dependent on the primary key through another non-key attribute. In the \texttt{Battery} table, for example, all attributes such as \texttt{Manufacturer}, \texttt{Max\_Voltage\_Limit}, and \texttt{Current\_SOH} describe the battery directly and are not dependent on any intermediate non-key attribute. Vehicle owner information is held in the \texttt{Vehicle} table and accessed via a foreign key, eliminating the transitive path $\texttt{Battery\_ID} \to \texttt{Unit\_ID} \to \texttt{Owner\_Name}$.
+
+\section{SQL Triggers — Working Principle}
+A SQL trigger is a database callback that the RDBMS engine invokes automatically when a specified data-manipulation event occurs on a target table. Triggers execute inside the database transaction, guaranteeing that fault detection is atomic with the data insertion that caused it.
+
+The general syntax of an \texttt{AFTER INSERT} trigger used in this project is:
+
+\begin{lstlisting}[language=SQL, caption={General trigger structure used in the BMS schema}]
+CREATE TRIGGER trigger_name
+AFTER INSERT ON Sensor_Reading
+WHEN <condition on NEW row>
+BEGIN
+    INSERT INTO Fault_Log (...);
+END;
+\end{lstlisting}
+
+Three triggers are defined in \texttt{schema.sql}:
+
+\begin{table}[h]
+    \centering
+    \caption{SQL Triggers implemented for automatic fault detection}
+    \begin{tabular}{@{} l l l @{}}
+        \toprule
+        \textbf{Trigger Name} & \textbf{Condition} & \textbf{Severity} \\
+        \midrule
+        \texttt{trigger\_over\_temperature} & \texttt{Temperature\_C > 60.0} & FATAL \\
+        \texttt{trigger\_over\_voltage}     & \texttt{Voltage\_V > Max\_Voltage\_Limit} & WARNING \\
+        \texttt{trigger\_critical\_soc}     & \texttt{SOC\_Percentage < 5.0} & WARNING \\
+        \bottomrule
+    \end{tabular}
+    \label{tab:triggers}
+\end{table}
+
+\section{Stored Procedure — Working Principle}
+SQLite does not natively support stored procedures. The equivalent procedural logic is implemented as a Python function exposed through a FastAPI endpoint (\texttt{POST /api/simulate/run\_diagnostics}). The procedure performs the following steps:
+
+\begin{enumerate}
+    \item Query the \texttt{Battery} table for all records where \texttt{Current\_SOH < 95.0}.
+    \item Count healthy and degraded batteries.
+    \item For each degraded battery, retrieve the Safe/Trickle charging profile from \texttt{Charging\_Profile}.
+    \item Insert a \texttt{Charge\_Recommendation} record linking the battery to the safe profile, along with a reasoning string.
+    \item Commit the transaction.
+\end{enumerate}
+
+\section{Battery Parameter Calculations}
+\subsection{Voltage Modelling}
+The terminal voltage of a lithium-ion cell is approximated as a linear function of SOC:
+\begin{equation}
+    V_{terminal} = V_{max} \times \left(0.8 + 0.2 \times \frac{\text{SOC}}{100}\right) + \epsilon
+    \label{eq:voltage}
+\end{equation}
+where $V_{max}$ is the chemistry-specific maximum voltage and $\epsilon \sim \mathcal{U}(-0.05,\ 0.05)$ is a random noise term simulating sensor jitter.
+
+\subsection{Fault Threshold Values}
+Fault thresholds were derived from published lithium-ion safety standards and are chemistry-specific:
+
+\begin{table}[h]
+    \centering
+    \caption{Chemistry-specific voltage limits used as trigger thresholds}
+    \begin{tabular}{@{} l c c @{}}
+        \toprule
+        \textbf{Chemistry} & \textbf{$V_{max}$ (V)} & \textbf{Over-Voltage Fault Threshold (V)} \\
+        \midrule
+        NMC & 4.20 & $> 4.20$ \\
+        LFP & 3.65 & $> 3.65$ \\
+        LTO & 2.85 & $> 2.85$ \\
+        \bottomrule
+    \end{tabular}
+    \label{tab:voltages}
+\end{table}
+
+%% ── IMAGE PLACEHOLDER ────────────────────────────────────────
+%% ADD IMAGE HERE: System architecture block diagram.
+%% You can draw this in draw.io or PowerPoint:
+%%   Frontend (Browser) <-> FastAPI Backend <-> SQLite Database
+%% Save as "architecture.png", upload to Overleaf, then uncomment:
+%%
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.85\textwidth]{architecture.png}
+    \caption{Three-tier system architecture of the Smart BMS}
+    \label{fig:arch}
+\end{figure}
+
+\newpage
+
+%% ============================================================
+%%  CHAPTER 7 — TEST ITEMS
+%% ============================================================
+\chapter{Test Items}
+
+This chapter defines each testable component of the Smart BMS, its purpose, and its expected behaviour under test conditions. Testing was conducted through a browser-based simulation console accessible at \texttt{localhost:8000} (Tab 2: Teacher Simulator).
+
+\section{SQL Trigger — Over-Voltage Detection}
+\textbf{Item:} \texttt{trigger\_over\_voltage} \\
+\textbf{Purpose:} Verify that the database engine automatically detects and logs a fault when a sensor reading contains a voltage value exceeding the battery's chemistry-specific maximum limit. \\
+\textbf{Test Method:} Click ``Test Trigger: Inject Over-Voltage Anomaly'' on the dashboard. This calls \texttt{POST /api/simulate/inject\_fault}, which inserts a reading with $V = V_{max} + 1.5\ \text{V}$ for the first battery in the database. \\
+\textbf{Expected Result:} A new \texttt{WARNING} row with Fault\_Type = ``Over-Voltage Detected'' appears in the Fault Log table immediately, with no Python code writing to \texttt{Fault\_Log} directly.
+
+%% ── IMAGE PLACEHOLDER ────────────────────────────────────────
+%% ADD IMAGE HERE: Screenshot of the fault log after clicking "Inject Over-Voltage".
+%% Save as "fault_log.png", upload to Overleaf, then uncomment:
+%%
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\textwidth]{fault_log.png}
+    \caption{Fault Log populated by SQL trigger after over-voltage injection}
+    \label{fig:faultlog}
+\end{figure}
+
+\section{SQL Trigger — Over-Temperature Detection}
+\textbf{Item:} \texttt{trigger\_over\_temperature} \\
+\textbf{Purpose:} Verify automatic detection of thermal anomalies that could lead to thermal runaway. \\
+\textbf{Test Method:} Click ``Test Trigger: Inject Critical Temp (75°C)''. This inserts a reading with $T = 75^\circ\text{C}$ and a safe voltage, ensuring only the temperature trigger fires. \\
+\textbf{Expected Result:} A \texttt{FATAL} severity fault row appears in the Fault Log. The endpoint additionally performs a post-insert verification query to confirm the trigger fired; if it did not, an HTTP 500 error is returned.
+
+\section{SQL Trigger — Critical SOC Detection}
+\textbf{Item:} \texttt{trigger\_critical\_soc} \\
+\textbf{Purpose:} Verify that batteries approaching complete depletion (SOC $< 5\%$) are flagged before damage occurs. \\
+\textbf{Test Method:} Click ``Test Trigger: Inject Critical SOC (0\%)''. This inserts a reading with \texttt{SOC\_Percentage = 0.0}. \\
+\textbf{Expected Result:} A \texttt{WARNING} fault row with description ``Critical Depletion (SOC $<$ 5\%)'' appears in the Fault Log.
+
+\section{Stored Procedure — Battery Diagnostics}
+\textbf{Item:} \texttt{POST /api/simulate/run\_diagnostics} (Stored Procedure Equivalent) \\
+\textbf{Purpose:} Verify that the diagnostic procedure correctly identifies degraded batteries and assigns appropriate charging profiles. \\
+\textbf{Test Method:} Click ``Test Procedure: Run Battery Diagnostics'' on the dashboard. \\
+\textbf{Expected Result:} The response panel displays the total number of batteries, a count of healthy (SOH $\geq 95\%$) and degraded batteries, and a list of degraded battery IDs with their SOH values. A \texttt{Charge\_Recommendation} row is inserted for each degraded battery, linking it to the Safe/Trickle charging profile.
+
+%% ── IMAGE PLACEHOLDER ────────────────────────────────────────
+%% ADD IMAGE HERE: Screenshot of the diagnostics result panel.
+%% Save as "diagnostics.png", upload to Overleaf, then uncomment:
+%%
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.85\textwidth]{diagnostics.png}
+    \caption{Stored procedure output showing degraded battery count and safe profile assignment}
+    \label{fig:diagnostics}
+\end{figure}
+
+\section{SQL View — Live Battery Status}
+\textbf{Item:} \texttt{View\_Live\_Battery\_Status} \\
+\textbf{Purpose:} Verify that the view correctly joins four tables and returns the latest sensor reading per battery alongside vehicle and owner information. \\
+\textbf{Test Method:} Navigate to Tab 3 (Live Data Monitor) on the dashboard. The SQL View table refreshes every 3 seconds. Alternatively, execute \texttt{SELECT * FROM View\_Live\_Battery\_Status;} directly in DB Browser for SQLite. \\
+\textbf{Expected Result:} All 25 batteries are listed with their chemistry type, owner name, latest SOC, voltage, temperature, and SOH. SOH values are colour-coded (green $\geq 95\%$, yellow $\geq 85\%$, red $< 85\%$).
+
+\section{Database Reset and Re-seeding}
+\textbf{Item:} \texttt{POST /api/simulate/reset\_database} \\
+\textbf{Purpose:} Verify that the database can be completely cleared and re-populated with fresh synthetic data, restoring the system to a known clean state for re-demonstration. \\
+\textbf{Test Method:} Click ``Reset Presentation Database''. \\
+\textbf{Expected Result:} All tables are cleared and \texttt{database\_setup.py} is re-executed, reinserting 25 vehicles, 25 batteries, 4 charging profiles, and 10,000 sensor readings. The Fault Log is repopulated by the triggers firing during re-seeding.
+
+\newpage
+
+%% ============================================================
+%%  CHAPTER 8 — EQUIPMENT AND APPARATUS
+%% ============================================================
+\chapter{Equipment and Apparatus}
+
+All components used in this project are software-based. No physical hardware was required. The following tools, languages, and libraries constitute the complete development environment.
+
+\begin{longtable}{@{} p{4cm} p{4cm} p{6cm} @{}}
+    \toprule
+    \textbf{Item} & \textbf{Version / Spec} & \textbf{Role in Project} \\
+    \midrule
+    \endhead
+    Python         & 3.12               & Primary backend programming language \\
+    FastAPI        & 0.111+             & REST API framework; serves frontend and database endpoints \\
+    Uvicorn        & 0.29+              & ASGI server for running the FastAPI application \\
+    SQLite         & 3.x (built-in)     & Embedded relational database engine \\
+    sqlite3 (lib)  & Python built-in    & Python interface to SQLite \\
+    Pandas         & 2.x               & Synthetic dataset generation and CSV export \\
+    NumPy          & 1.x               & Random number generation for sensor simulation \\
+    Chart.js       & CDN (latest)       & Client-side library for rendering live telemetry charts \\
+    Viz.js         & 2.1.2 (CDN)        & Renders EER diagram from GraphViz DOT notation in browser \\
+    HTML5 / CSS3   & —                  & Frontend structure and glassmorphism styling \\
+    JavaScript (ES6+) & —             & Frontend interactivity, fetch API, DOM manipulation \\
+    Google Fonts (Inter, Outfit) & CDN & Typography \\
+    DB Browser for SQLite & 3.x       & GUI database inspection and manual SQL querying \\
+    Visual Studio Code & Latest        & Code editor \\
+    Overleaf       & Online            & LaTeX report compilation \\
+    Eraser AI      & Online            & Architecture block diagram generation \\
+    Gamma          & Online            & Presentation slide generation \\
+    Git            & 2.x               & Version control \\
+    \bottomrule
+\end{longtable}
+
+\newpage
+
+%% ============================================================
+%%  CHAPTER 9 — COST ANALYSIS
+%% ============================================================
+\chapter{Cost Analysis}
+
+All software, libraries, and tools used in this project are open-source or freely available. The total monetary cost of the project is therefore \textbf{zero (Rs. 0)}. The following table itemises each component and its licensing status.
+
+\begin{longtable}{@{} p{4.5cm} p{3cm} p{3cm} p{3cm} @{}}
+    \toprule
+    \textbf{Component} & \textbf{License} & \textbf{Cost (Rs.)} & \textbf{Notes} \\
+    \midrule
+    \endhead
+    Python 3.12         & PSF (Open Source) & 0   & Free to download and use \\
+    FastAPI             & MIT               & 0   & Open-source Python framework \\
+    SQLite              & Public Domain     & 0   & Embedded; no server required \\
+    Pandas / NumPy      & BSD               & 0   & Open-source data libraries \\
+    Chart.js            & MIT               & 0   & Free CDN \\
+    Viz.js              & MIT               & 0   & Free CDN \\
+    DB Browser for SQLite & MIT            & 0   & Free desktop application \\
+    Visual Studio Code  & MIT               & 0   & Free code editor \\
+    Overleaf (Free tier)& Proprietary       & 0   & Free for single users \\
+    Eraser AI (Free tier)& Proprietary     & 0   & Free diagram tool \\
+    Gamma (Free tier)   & Proprietary       & 0   & Free presentation tool \\
+    Web hosting         & N/A               & 0   & Runs locally on localhost \\
+    \midrule
+    \textbf{Total Cost} & & \textbf{Rs. 0} & \\
+    \bottomrule
+\end{longtable}
+
+\textbf{Note:} The project was developed entirely on a personal laptop running Windows. No cloud services, paid APIs, or licensed software were used. The only resource consumed was development time, estimated at approximately 40 person-hours across design, implementation, testing, and documentation phases.
+
+\newpage
+
+%% ============================================================
+%%  CHAPTER 10 — PROCEDURE
+%% ============================================================
+\chapter{Procedure}
+
+This chapter documents the complete methodology followed from project conception to final demonstration, in chronological order.
+
+\section{Phase 1 — Requirements Analysis and Problem Definition}
+The project was scoped around the CEP requirement to demonstrate SQL triggers and stored procedures in a meaningful engineering context. Battery management systems were selected as the application domain due to the naturally tabular, time-series nature of sensor data and the safety-critical requirement for automated anomaly detection. The following requirements were identified:
+
+\begin{itemize}
+    \item Design a normalised relational schema (3NF) modelling a real-world BMS.
+    \item Construct an EER model in Chen notation capturing specialisation and weak-entity relationships.
+    \item Implement at least two SQL triggers for automatic fault detection.
+    \item Implement stored-procedure logic for charging-profile recommendation.
+    \item Build a full-stack web application to demonstrate all constructs interactively.
+\end{itemize}
+
+\section{Phase 2 — EER Modelling and Schema Design}
+The EER model was designed first, identifying six entities and their cardinality constraints. The Battery superclass was specialised into NMC, LFP, and LTO subclasses using a disjoint, total participation constraint. Sensor\_Reading was identified as a weak entity with a total participation, identifying relationship to Battery.
+
+The schema was then translated from the EER model to SQL DDL in \texttt{schema.sql}, applying Table-per-Hierarchy mapping for the Battery specialisation to optimise query performance. All foreign key constraints, check constraints, and cascade rules were defined at this stage.
+
+\section{Phase 3 — Synthetic Dataset Generation}
+A Python script (\texttt{data\_generator/generate\_data.py}) was authored to produce four CSV files:
+
+\begin{enumerate}
+    \item \texttt{Vehicles.csv} — 25 vehicles with randomised owner names, unit types, and registration dates.
+    \item \texttt{Batteries.csv} — 25 batteries, one per vehicle, with chemistry randomly assigned from \{NMC, LFP, LTO\} and chemistry-specific attributes populated accordingly.
+    \item \texttt{Charging\_Profiles.csv} — 4 static profiles: Ultra-Fast Charge, Trickle Charge, Cell Balancing, and Thermal Safe Mode.
+    \item \texttt{Sensor\_Readings.csv} — 10,000 time-series readings simulating 30 days of charging and discharging cycles. Approximately 1\% of readings contain intentionally injected anomalies (over-voltage or over-temperature) to validate trigger behaviour.
+\end{enumerate}
+
+\section{Phase 4 — Database Initialisation}
+The script \texttt{backend/database\_setup.py} was written to:
+\begin{enumerate}
+    \item Connect to (or create) \texttt{bms\_database.db}.
+    \item Execute \texttt{schema.sql} to create all tables, triggers, and the view.
+    \item Ingest the four CSV files in foreign-key dependency order: Vehicle → Charging\_Profile → Battery → Sensor\_Reading.
+    \item Use \texttt{cursor.executemany()} for the 10,000-row sensor reading import, ensuring triggers fire on each row.
+\end{enumerate}
+The number of faults automatically caught by triggers during this import phase was recorded as a validation metric.
+
+\section{Phase 5 — Backend API Development}
+The FastAPI backend (\texttt{backend/main.py}) was developed with the following endpoints:
+
+\begin{table}[h]
+    \centering
+    \caption{REST API endpoints implemented in the FastAPI backend}
+    \begin{tabular}{@{} l l p{6cm} @{}}
+        \toprule
+        \textbf{Method} & \textbf{Endpoint} & \textbf{Description} \\
+        \midrule
+        GET  & \texttt{/}                              & Serves \texttt{index.html} (dashboard) \\
+        GET  & \texttt{/api/dashboard}                  & Queries \texttt{View\_Live\_Battery\_Status} \\
+        GET  & \texttt{/api/faults}                     & Returns 10 most recent fault log entries \\
+        GET  & \texttt{/api/live\_telemetry}             & Returns 15 most recent sensor readings \\
+        POST & \texttt{/api/simulate/inject\_fault}      & Injects over-voltage reading \\
+        POST & \texttt{/api/simulate/inject\_soc\_fault} & Injects critical SOC reading \\
+        POST & \texttt{/api/simulate/inject\_temp\_fault}& Injects over-temperature reading \\
+        POST & \texttt{/api/simulate/run\_diagnostics}  & Runs stored-procedure diagnostic \\
+        POST & \texttt{/api/simulate/reset\_database}   & Resets and re-seeds the database \\
+        \bottomrule
+    \end{tabular}
+    \label{tab:endpoints}
+\end{table}
+
+An asynchronous background task (\texttt{live\_data\_generator}) was added using Python's \texttt{asyncio} library to insert a new realistic sensor reading every 3 seconds, enabling true real-time dashboard behaviour.
+
+\section{Phase 6 — Frontend Dashboard Development}
+The frontend was built as a single HTML page (\texttt{frontend/index.html}) with three tabs:
+\begin{enumerate}
+    \item \textbf{Architecture (EER):} Renders the EER diagram dynamically using Viz.js from a GraphViz DOT string defined in \texttt{eer\_diagram.js}.
+    \item \textbf{Teacher Simulator:} Provides interactive buttons to inject anomalies, run diagnostics, and reset the database, with a response panel showing real-time feedback.
+    \item \textbf{Live Data Monitor:} Displays the SQL View table and a Chart.js dual-axis line chart (Voltage vs Temperature), both refreshing every 3 seconds.
+\end{enumerate}
+
+\section{Phase 7 — Testing and Validation}
+Each trigger was tested independently by clicking the corresponding injection button and verifying fault log entries. The stored procedure was validated by running diagnostics and confirming \texttt{Charge\_Recommendation} rows in DB Browser for SQLite. The live data generator was validated by observing the ``Updated HH:MM:SS'' timestamp in the SQL View panel updating every 3 seconds with rows flashing green.
+
+
+
+\newpage
+
+%% ============================================================
+%%  CHAPTER 11 — RESULT
+%% ============================================================
+\chapter{Result}
+
+\section{Database Initialisation Results}
+Upon execution of \texttt{database\_setup.py} with the 10,000-row sensor dataset, the SQL triggers fired automatically during the bulk insert phase. The terminal output confirmed the number of faults autonomously detected and logged, demonstrating that the triggers are correctly embedded in the SQLite engine and operate independently of any application code.
+
+\begin{table}[h]
+    \centering
+    \caption{Database initialisation summary}
+    \begin{tabular}{@{} l r @{}}
+        \toprule
+        \textbf{Metric} & \textbf{Value} \\
+        \midrule
+        Total vehicles seeded         & 25 \\
+        Total batteries seeded        & 25 \\
+        Total sensor readings ingested & 10{,}000 \\
+        Charging profiles defined     & 4 \\
+        Faults auto-detected by triggers & $\sim$100--150 (varies per run) \\
+        \bottomrule
+    \end{tabular}
+    \label{tab:results}
+\end{table}
+
+\section{Trigger Test Results}
+All three triggers were tested individually and produced correct results:
+
+\begin{itemize}
+    \item \textbf{Over-Voltage Trigger:} Injecting $V = V_{max} + 1.5\ \text{V}$ produced an immediate \texttt{WARNING} entry in the Fault Log. Verified through both the dashboard and DB Browser for SQLite.
+    \item \textbf{Over-Temperature Trigger:} Injecting $T = 75^\circ\text{C}$ produced a \texttt{FATAL} entry. The backend endpoint confirmed trigger execution via a post-insert verification query.
+    \item \textbf{Critical SOC Trigger:} Injecting \texttt{SOC = 0.0\%} produced a \texttt{WARNING} entry with the description ``Critical Depletion (SOC $<$ 5\%)''.
+\end{itemize}
+
+\section{Stored Procedure Result}
+Execution of the diagnostic procedure correctly identified batteries with \texttt{Current\_SOH $<$ 95\%}, displayed their IDs and SOH percentages on the dashboard, and inserted corresponding \texttt{Charge\_Recommendation} rows linking each degraded battery to the Safe/Trickle charging profile. The result was verified in DB Browser by querying:
+\begin{lstlisting}[language=SQL, caption={Verification query for stored procedure output}]
+SELECT cr.Battery_ID, cp.Profile_Name, cr.Reasoning
+FROM Charge_Recommendation cr
+JOIN Charging_Profile cp ON cr.Profile_ID = cp.Profile_ID;
+\end{lstlisting}
+
+\section{Live Dashboard Result}
+The real-time dashboard successfully demonstrated:
+\begin{itemize}
+    \item The SQL View table (\texttt{View\_Live\_Battery\_Status}) updating every 3 seconds with a visible green row-flash animation confirming live data flow.
+    \item The Chart.js telemetry chart rendering dual-axis voltage and temperature traces with timestamps accurate to the second.
+    \item The fault log updating automatically as the background data generator occasionally produced anomalous readings.
+\end{itemize}
+
+%% ── IMAGE PLACEHOLDER ────────────────────────────────────────
+%% ADD IMAGE HERE: Screenshot of Tab 3 (Live Data Monitor) showing chart + SQL view table.
+%% Save as "live_monitor.png", upload to Overleaf, then uncomment:
+%%
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\textwidth]{live_monitor.png}
+    \caption{Live Data Monitor tab showing real-time telemetry chart and SQL View table}
+    \label{fig:livemonitor}
+\end{figure}
+
+\newpage
+
+%% ============================================================
+%%  CHAPTER 12 — CONCLUSION
+%% ============================================================
+\chapter{Conclusion}
+
+This project successfully designed and implemented a full-stack Smart Battery Management System demonstrating the practical application of advanced relational database programming constructs in a safety-critical engineering domain.
+
+The ideal system, as envisioned during the requirements phase, demanded: (1) a normalised schema free of data anomalies, (2) automatic fault detection requiring no application-layer code, and (3) intelligent charging-profile recommendation. All three objectives were met.
+
+In practice, the 3NF schema was enforced with no observed redundancy or anomaly during testing. The three SQL triggers operated with zero false negatives on the injected test cases and correctly filtered the bulk-imported dataset to log only genuine threshold violations. The stored-procedure logic accurately identified degraded batteries and enforced safe charging profiles, with all recommendations verifiable in the database.
+
+The principal limitation encountered was SQLite's lack of native stored-procedure support, addressed by implementing the equivalent logic in the Python application layer. While functionally equivalent, this represents a deviation from the strict definition of a stored procedure and would not apply in Oracle or PostgreSQL deployments.
+
+A secondary limitation is that the dataset is entirely synthetic. Real battery cells exhibit non-linear voltage curves, hysteresis, and temperature-dependent capacity fade that are not fully captured by the linear approximation in Equation~\ref{eq:voltage}. Future work could integrate actual BMS telemetry data exported from hardware platforms such as the Texas Instruments BQ76952.
+
+Overall, the project demonstrates that a well-architected relational database, leveraging triggers and procedural logic, can serve as the analytical core of a safety-critical BMS — a design pattern directly applicable to production systems at scale.
+
+\newpage
+
+%% ============================================================
+%%  CHAPTER 13 — REFERENCES (IEEE Style)
+%% ============================================================
+\chapter*{References}
+\addcontentsline{toc}{chapter}{References}
+
+\begin{enumerate}[label={[\arabic*]}]
+
+    \item R.~Ramakrishnan and J.~Gehrke, \textit{Database Management Systems}, 3rd~ed. New York, NY, USA: McGraw-Hill, 2003.
+
+    \item C.~J.~Date, \textit{An Introduction to Database Systems}, 8th~ed. Boston, MA, USA: Addison-Wesley, 2004.
+
+    \item R.~Elmasri and S.~B.~Navathe, \textit{Fundamentals of Database Systems}, 7th~ed. Hoboken, NJ, USA: Pearson, 2016.
+
+    \item S.~Abramowitz, ``SQLite documentation,'' SQLite Consortium. [Online]. Available: \url{https://www.sqlite.org/docs.html}. [Accessed: Apr.~2026].
+
+    \item T.~Christie \textit{et al.}, ``FastAPI,'' Tiangolo, 2024. [Online]. Available: \url{https://fastapi.tiangolo.com}. [Accessed: Apr.~2026].
+
+    \item L.~Lu, X.~Han, J.~Li, J.~Hua, and M.~Ouyang, ``A review on the key issues for lithium-ion battery management in electric vehicles,'' \textit{Journal of Power Sources}, vol.~226, pp.~272--288, Mar.~2013.
+
+    \item A.~Barr{\'e}, B.~Deguilhem, S.~Grolleau, M.~G{\'e}rard, F.~Suard, and D.~Riu, ``A review on lithium-ion battery ageing mechanisms and estimations for automotive applications,'' \textit{Journal of Power Sources}, vol.~241, pp.~680--689, Nov.~2013.
+
+    \item W.~McKinney, ``Data structures for statistical computing in Python,'' in \textit{Proc. 9th Python in Science Conf. (SciPy 2010)}, Austin, TX, USA, Jun.~2010, pp.~51--56.
+
+    \item C.~R.~Harris \textit{et al.}, ``Array programming with NumPy,'' \textit{Nature}, vol.~585, pp.~357--362, Sep.~2020.
+
+\end{enumerate}
+
+\newpage
+
+%% ============================================================
+%%  CHAPTER 14 — APPENDICES
+%% ============================================================
+\chapter*{Appendices}
+\addcontentsline{toc}{chapter}{Appendices}
+
+\section*{Appendix A — Complete Database Schema (schema.sql)}
+
+\begin{lstlisting}[language=SQL, caption={Complete SQLite schema including tables, triggers, and view}]
+PRAGMA foreign_keys = ON;
+
+-- VEHICLE Table
+CREATE TABLE IF NOT EXISTS Vehicle (
+    Unit_ID           TEXT PRIMARY KEY,
+    Owner_Name        TEXT NOT NULL,
+    Unit_Type         TEXT NOT NULL,
+    Registration_Date DATE NOT NULL
+);
+
+-- BATTERY Table (Superclass with specialisation attributes)
+CREATE TABLE IF NOT EXISTS Battery (
+    Battery_ID                  TEXT PRIMARY KEY,
+    Unit_ID                     TEXT NOT NULL,
+    Manufacturer                TEXT NOT NULL,
+    Manufacture_Date            DATE NOT NULL,
+    Capacity_kWh                REAL NOT NULL,
+    Chemistry_Type              TEXT NOT NULL,
+    Current_SOH                 REAL NOT NULL CHECK (Current_SOH >= 0 AND Current_SOH <= 100),
+    Cobalt_Percentage           REAL,
+    Max_Voltage_Limit           REAL,
+    Thermal_Runaway_Threshold   REAL,
+    Extreme_Cold_Tolerance_Limit REAL,
+    FOREIGN KEY (Unit_ID) REFERENCES Vehicle (Unit_ID) ON DELETE CASCADE
+);
+
+-- CHARGING PROFILE Table
+CREATE TABLE IF NOT EXISTS Charging_Profile (
+    Profile_ID                    TEXT PRIMARY KEY,
+    Profile_Name                  TEXT NOT NULL,
+    Target_Voltage                REAL NOT NULL,
+    Max_Current                   REAL NOT NULL,
+    Recommended_Temperature_Range TEXT
+);
+
+-- SENSOR READING Table (Weak Entity)
+CREATE TABLE IF NOT EXISTS Sensor_Reading (
+    Reading_ID      TEXT PRIMARY KEY,
+    Battery_ID      TEXT NOT NULL,
+    Timestamp       DATETIME NOT NULL,
+    Voltage_V       REAL NOT NULL,
+    Current_A       REAL NOT NULL,
+    Temperature_C   REAL NOT NULL,
+    SOC_Percentage  REAL NOT NULL CHECK (SOC_Percentage >= 0 AND SOC_Percentage <= 100),
+    Cycle_Count     INTEGER NOT NULL,
+    FOREIGN KEY (Battery_ID) REFERENCES Battery (Battery_ID) ON DELETE CASCADE
+);
+
+-- FAULT LOG Table (Populated by Triggers only)
+CREATE TABLE IF NOT EXISTS Fault_Log (
+    Fault_ID    INTEGER PRIMARY KEY AUTOINCREMENT,
+    Battery_ID  TEXT NOT NULL,
+    Reading_ID  TEXT NOT NULL,
+    Fault_Type  TEXT NOT NULL,
+    Severity    TEXT NOT NULL,
+    Detected_At DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (Battery_ID) REFERENCES Battery (Battery_ID) ON DELETE CASCADE,
+    FOREIGN KEY (Reading_ID) REFERENCES Sensor_Reading (Reading_ID) ON DELETE CASCADE
+);
+
+-- CHARGE RECOMMENDATION Table
+CREATE TABLE IF NOT EXISTS Charge_Recommendation (
+    Recommendation_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+    Battery_ID        TEXT NOT NULL,
+    Profile_ID        TEXT NOT NULL,
+    Reasoning         TEXT NOT NULL,
+    Recommended_At    DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (Battery_ID) REFERENCES Battery (Battery_ID) ON DELETE CASCADE,
+    FOREIGN KEY (Profile_ID) REFERENCES Charging_Profile (Profile_ID) ON DELETE CASCADE
+);
+
+-- TRIGGER 1: Over-Temperature
+CREATE TRIGGER IF NOT EXISTS trigger_over_temperature
+AFTER INSERT ON Sensor_Reading
+WHEN NEW.Temperature_C > 60.0
+BEGIN
+    INSERT INTO Fault_Log (Battery_ID, Reading_ID, Fault_Type, Severity)
+    VALUES (NEW.Battery_ID, NEW.Reading_ID, 'Critical Over-Temperature', 'FATAL');
+END;
+
+-- TRIGGER 2: Over-Voltage (chemistry-specific)
+CREATE TRIGGER IF NOT EXISTS trigger_over_voltage
+AFTER INSERT ON Sensor_Reading
+WHEN NEW.Voltage_V > (SELECT Max_Voltage_Limit FROM Battery
+                      WHERE Battery_ID = NEW.Battery_ID)
+BEGIN
+    INSERT INTO Fault_Log (Battery_ID, Reading_ID, Fault_Type, Severity)
+    VALUES (NEW.Battery_ID, NEW.Reading_ID, 'Over-Voltage Detected', 'WARNING');
+END;
+
+-- TRIGGER 3: Critical SOC
+CREATE TRIGGER IF NOT EXISTS trigger_critical_soc
+AFTER INSERT ON Sensor_Reading
+WHEN NEW.SOC_Percentage < 5.0
+BEGIN
+    INSERT INTO Fault_Log (Battery_ID, Reading_ID, Fault_Type, Severity)
+    VALUES (NEW.Battery_ID, NEW.Reading_ID,
+            'Critical Depletion (SOC < 5%)', 'WARNING');
+END;
+
+-- VIEW: Real-Time Battery Status
+CREATE VIEW IF NOT EXISTS View_Live_Battery_Status AS
+SELECT b.Battery_ID, b.Chemistry_Type, b.Current_SOH,
+       v.Owner_Name, s.SOC_Percentage, s.Temperature_C, s.Voltage_V
+FROM Battery b
+JOIN Vehicle v ON b.Unit_ID = v.Unit_ID
+JOIN (SELECT Battery_ID, MAX(Timestamp) AS Latest_Time
+      FROM Sensor_Reading GROUP BY Battery_ID) latest
+     ON b.Battery_ID = latest.Battery_ID
+JOIN Sensor_Reading s ON latest.Battery_ID = s.Battery_ID
+                     AND latest.Latest_Time = s.Timestamp;
+\end{lstlisting}
+
+\section*{Appendix B — Charging Profile Definitions}
+
+\begin{table}[h]
+    \centering
+    \caption{Charging profiles seeded into the database}
+    \begin{tabular}{@{} l l c c l @{}}
+        \toprule
+        \textbf{Profile ID} & \textbf{Name} & \textbf{Target V} & \textbf{Max I (A)} & \textbf{Temp Range} \\
+        \midrule
+        P-01 & Ultra-Fast Charge & 4.2 & 200 & 20--40 °C \\
+        P-02 & Trickle Charge    & 3.8 &  10 & 10--45 °C \\
+        P-03 & Cell Balancing    & 3.6 &   5 & 15--35 °C \\
+        P-04 & Thermal Safe Mode & 3.4 &   0 &  0--25 °C \\
+        \bottomrule
+    \end{tabular}
+    \label{tab:profiles}
+\end{table}
+
+\section*{Appendix C — API Endpoint Reference}
+
+\begin{longtable}{@{} l l p{7cm} @{}}
+    \toprule
+    \textbf{Method} & \textbf{Endpoint} & \textbf{Description} \\
+    \midrule
+    \endhead
+    GET  & \texttt{/}                               & Serves the HTML dashboard \\
+    GET  & \texttt{/api/dashboard}                  & Returns vehicle count, fault count, and SQL View data \\
+    GET  & \texttt{/api/faults}                     & Returns 10 most recent Fault\_Log entries \\
+    GET  & \texttt{/api/live\_telemetry}             & Returns 15 most recent Sensor\_Reading rows (with JOIN) \\
+    POST & \texttt{/api/simulate/inject\_fault}      & Inserts over-voltage reading; tests trigger \\
+    POST & \texttt{/api/simulate/inject\_soc\_fault} & Inserts SOC = 0\% reading; tests trigger \\
+    POST & \texttt{/api/simulate/inject\_temp\_fault}& Inserts Temp = 75°C reading; tests trigger \\
+    POST & \texttt{/api/simulate/run\_diagnostics}   & Runs diagnostic stored-procedure logic \\
+    POST & \texttt{/api/simulate/reset\_database}    & Drops all data and re-runs database\_setup.py \\
+    \bottomrule
+\end{longtable}
+
+\end{document}
+

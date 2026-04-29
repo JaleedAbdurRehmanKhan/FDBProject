@@ -1,0 +1,774 @@
+Page 1 of 8 
+ 
+ 
+         National University    
+of Computer & Emerging Sciences    
+   
+EE Department 
+          (Karachi Campus) 
+ Complex Engineering Problem          
+ 
+Course Code: CS2011                        Fundamentals of Databases                              Date: 20/03/2026        
+           Spring 2026     
+ 
+Student Name: ______________________ Section:______   Student Roll No :_______ 
+ 
+INSTRUCTIONS:  
+1. This CEP is a group assessment. A group is of 3 or 2 students. 
+2. There will be demonstration and report session along with the submission. 
+3. The submission date of CEP is Friday, 1st May, 2026. 
+ 
+1. Problem Description 
+With the rapid advancement of electric vehicles and large -scale energy storage systems, Battery 
+Management Systems (BMS) have become increasingly reliant on data -driven intelligence to 
+ensure safety, reliability, and optimal performance. Modern battery systems continuously generate 
+large volumes of time -series data through embedded s ensors, including voltage, current, 
+temperature, and derived parameters such as State of Charge (SOC) and State of Health (SOH). 
+Traditional data handling approaches are insufficient to efficiently manage, analyze, and extract 
+insights from such high-frequency, multi-dimensional datasets. Additionally, modern BMS must 
+support multiple battery chemistries (e.g., NMC, LFP, LTO), monitor charging and discharging 
+cycles, detect faults (such as over -voltage and over-temperature), and track degradation patterns 
+over time. 
+This problem involves the design and implementation of a relational database system for a smart 
+BMS that addresses challenges of scalability, data integrity, real -time monitoring, and analytical 
+querying. The system must support structured storage of battery data, enable efficient querying for 
+performance evaluation, and facilitate intelligent decision -making for battery safety and 
+optimization. 
+The solution requires the development of an Enhanced Entity-Relationship (EER) model , its 
+transformation into a normalized relational schema, and implementation of advanced SQL -based 
+analytics. Additionally, the system must incorporate database programming constructs such as 
+triggers for automatic fault detection and stored procedures for recommending charg ing profiles 
+based on battery condition. 
+The complexity of the problem lies in handling time-series data efficiently, modeling hierarchical 
+battery types using specialization, ensuring normalization while maintaining performance, and 
+enabling advanced analytical queries for degradation analysis and fast-charging optimization. 
+ 
+ 
+
+Page 2 of 8 
+ 
+2. Targeted Attributes 
+ 
+The tested attributes of the CEP are marked in the given table. 
+ 
+Attribute Code Description Tested? 
+Depth of knowledge WP1 
+Cannot be solved without the in-depth engineering 
+expertise which involves design and development of 
+solution, investigation, modern tool usage, societal 
+impact, and ethics 
+ 
+Range of 
+Conflicting 
+requirements 
+WP2 Involve a variety of technological, engineering, and 
+other topics that are broad or contradictory.  
+In-depth analysis 
+requirement WP3 Have no apparent solution and necessitate abstract 
+thought and research to devise appropriate models.  
+Familiarity of issues WP4 Involve problems that aren't usually experienced.  
+The extent of 
+applicable codes WP5 They are issues that are not covered by technical 
+engineering guidelines and codes of practice.  
+Stakeholder 
+involvement  WP6 Involve a variety of stakeholders with a wide range 
+of needs.  
+Interdependence WP7 They are any high-level issues including a large 
+number of parts or sub-problems.  
+ 
+3. Justification 
+ 
+In this problem, four different attributes of the CEP are involved. The justification of each 
+attribute’s involvement is given below. 
+Depth of Knowledge Required: 
+The problem demands expertise in database design (EER modeling, relational schema), 
+normalization (up to 3NF), and advanced SQL programming including triggers and stored 
+procedures. Additionally, understanding battery systems and their parameters is required. 
+Range of Conflicting Requirements: 
+The design must balance normalized structure (to reduce redundancy) with query performance for 
+large time-series datasets. Trade-offs arise between efficient storage and fast analytical queries. 
+In-depth Analysis Requirement: 
+Students must analyze battery degradation patterns, detect abnormal SOH drops, evaluate fast-
+charging impacts, and compare battery chemistries under similar conditions. 
+Familiarity of Issues: 
+This problem integrates database systems with energy storag e applications, requiring 
+interdisciplinary understanding of electrical systems, data analytics, and database system design. 
+ 
+ 
+ 
+ 
+ 
+Page 3 of 8 
+ 
+ 
+ 
+ 
+4. Plan of Work 
+ 
+This CEP will be completed in five  different phases, the description of each phase along with its 
+due date and marks are given in the table below. 
+ 
+Phase 
+No. Description Due Date Total 
+Marks 
+1 
+Requirement Analysis & Data Collection 
+ Dataset selection (real or synthetic), system 
+requirements 
+10 April 
+2026 10 
+2 
+ 
+EER Model Design 
+ Specialization (battery types), entities, relationships 
+16 April 
+2026 
+ 
+20 
+3 
+ 
+Relational Schema & Normalization 
+ Schema design, PK/FK, 3NF justification 
+22 April 
+2026 
+ 
+20 
+4 
+ 
+SQL-Based Data Analysis 
+ Queries for degradation, faults, and performance 
+ 
+28 April 
+2026 
+ 
+20 
+5 
+ 
+Database Programming 
+ Trigger (fault detection), stored procedure (charging 
+recommendation) 
+Final Report Submission 
+ Prepare and submit the final report/user manual 
+according to given template. 
+1st May 2026  
+30 
+ 
+5. Report Format 
+ 
+Prepare your final report according to the given guidelines. 
+ 
+5.1. Contents of Report 
+ 
+The following items must be in your report. 
+1. Title Page  
+2. Table of contents 
+3. Abstract (write a structured abstract) 
+4. Introduction (introduce your project briefly in this section) 
+5. Nomenclature (define the terms and abbreviations used in report) 
+6. Theory and Calculations (describe the theory involved in your project design, and also 
+mention the working principles along with all the calculations performed) 
+7. Test Items (define those items with their brief working which are used in your project for 
+testing, or the items that need to be tested before inserting them in the project) 
+8. Equipment and Apparatus (list of all items used) 
+9. Cost Analysis (cost of each component and total cost) 
+10. Procedure (the complete method you followed for project design. Each and every step 
+from planning to final touch. You may insert block and circuit diagrams in this section) 
+11. Result (The final result of your attempt) 
+12. Conclusion (Conclude the whole project by comparing the ideal one with your practical 
+results) 
+13. References (Provide the reference list in IEEE style) 
+14. Appendices (You can include datasheets and any other helping reference in this section) 
+ 
+Page 4 of 8 
+ 
+5.2. Length and Formatting 
+ 
+ There is no specific limit on the length of the report, but with the above-mentioned contents 
+your report will easily cover a minimum of 20 pages (excluding title page and appendices). 
+ Follow the same font throughout of report and same heading, sub heading size/style. 
+ The text must be justified on both sides of the paper. 
+ Do not use smiley and informal words. 
+ Do not increase the line spacing and don’t insert blank lines to fill up more and more pages. 
+ Insert the page number at the bottom centre. 
+5.3. AI Content, Plagiarism, and Similarity 
+ 
+ Turnitin similarity index must be less than 19% with less than 5% from a single source. 
+ AI percentage must be less than 20%. 
+ Similarity between the report of peers must be 0%. 
+ 
+6. Assessment Rubrics 
+ 
+Every deliverable will be assessed separately; however, generic rubrics are given below for each 
+student. 
+ 
+Rubric for Complex Engineering Problem 
+Problem solving is the process of designing, evaluating, and implementing a strategy to answer 
+an open-ended question or achieve a desired goal. 
+S.  
+No. 
+                
+                                             
+Quality  
+ 
+No/Limited 
+Proficiency  
+(0-1point) 
+Some 
+Proficiency  
+(2 points)  
+Proficiency  
+(3 points)  
+High 
+Proficiency  
+(4-5 points)  
+ 
+N/A Rating 
+(Each 
+out of 
+5) 
+Criteria 
+(as per PEC 
+Manual)  
+ 
+1 Depth of knowledge 
+required: 
+Require research -
+based knowledge. 
+Demonstrates 
+poor research -
+based 
+knowledge in 
+regard to the 
+implemented 
+solution 
+Demonstrates 
+inadequate 
+research-based 
+knowledge, the 
+implemented 
+solution having 
+very little depth 
+regarding 
+research 
+Demonstrates a 
+high level of 
+research-based 
+knowledge with 
+the implemented 
+solution, the level 
+of research done 
+is adequate 
+Demonstrates 
+remarkable 
+research-based 
+knowledge, the 
+implemented 
+solution uses 
+research-based 
+knowledge in 
+novel ways to 
+approach the 
+problem. 
+ X1 
+2 Depth of analysis 
+required:  
+Have no obvious 
+solution, require 
+abstract thinking, 
+originality in 
+analysis to 
+formulate suitable 
+model. 
+Analysis of 
+solution is very 
+basic and shows 
+no level of 
+abstract thinking, 
+the solution also 
+lacks any form of 
+originality 
+regarding the 
+formulation of a 
+suitable model. 
+ 
+Analysis of 
+solution is brief 
+and shows 
+limited levels of 
+abstract 
+thinking, but the 
+solution lacks 
+originality to 
+form a suitable 
+model. 
+Analysis of 
+solution is 
+adequate and 
+shows higher 
+level of abstract 
+thinking and 
+shows originality 
+in 
+implementation 
+of a suitable 
+model. 
+Analysis of 
+solution is deep 
+and effective 
+containing 
+insightful levels 
+of abstract 
+thinking and 
+originality is 
+shown in the 
+implementation 
+of a suitable 
+model. 
+ X2 
+2 Range of conflicting 
+requirements: 
+Involve wide-
+ranging or 
+conflicting technical, 
+engineering, and 
+other issues.  
+Implements a 
+solution tackling 
+very basic 
+problems and 
+issues that have 
+limited or no 
+impact. 
+Implements a 
+solution which 
+tackles a few 
+problems of 
+conflicting 
+nature but fails 
+to address the 
+Implements a 
+solution which 
+tackles some 
+wide-ranging 
+issues and 
+conflicting 
+problems. 
+Implements a 
+solution which 
+tackles wide -
+ranging issues 
+and conflicting 
+problems. 
+ X3 
+Page 5 of 8 
+ 
+other wide -
+ranging issues. 
+4 Familiarity of 
+issues: 
+Involve infrequently 
+encountered issues. 
+Demonstrates 
+limited ability to 
+involve 
+infrequently 
+encountered 
+issues, the 
+solution only 
+addresses 
+common basic 
+issues  
+Demonstrates 
+the ability to 
+involve a few 
+infrequently 
+encountered 
+issues but is 
+unable to 
+extend beyond 
+some select 
+issues. 
+Demonstrates an 
+adequate ability 
+to involve 
+infrequently 
+encountered 
+issues, the 
+presented 
+solution 
+addresses some 
+rare issues. 
+Demonstrates 
+the solution in an 
+excellent manner 
+show-casing the 
+ability to involve 
+and overcome 
+the infrequently 
+encountered 
+issues. 
+ X4 
+5 Extent of applicable 
+codes: 
+Are outside 
+problems 
+encompassed by 
+standards and 
+codes of practice? 
+The 
+implemented 
+solution lies 
+within the 
+problems laid out 
+by the standards 
+and codes of 
+practice and is 
+unable to show 
+any dissimilarity 
+from already 
+encompassed 
+problems. 
+Implemented 
+solution shows 
+little variance 
+from already 
+encompassed 
+problems but is 
+unable to meet 
+the r equired 
+criteria i.e., it 
+falls under the 
+already 
+encompassed 
+problems. 
+Implements an 
+adequate 
+solution which 
+lies outside the 
+already enclosed 
+solutions. 
+An exemplary 
+solution which 
+addresses a 
+unique and 
+complex problem 
+which lies 
+outside the 
+standards and 
+codes of 
+practice. 
+NA X5 
+6 Extent of 
+stakeholder 
+involvement and 
+level of conflicting 
+requirements: 
+Involve diverse 
+groups of 
+stakeholders with 
+varying needs. 
+The solution 
+lacks to include a 
+diverse group of 
+stakeholders 
+catering only to 
+the needs of a 
+select few. 
+The solution 
+includes some 
+groups but 
+lacks diversity 
+of stakeholders 
+failing to 
+address the 
+varying needs. 
+The solution 
+addresses the 
+varying needs of 
+different diverse 
+groups of 
+stakeholders in a 
+satisfactory 
+manner. 
+The solution 
+takes an 
+excellent 
+approach to 
+meet the needs 
+of a diverse 
+group of 
+stakeholders, the 
+solution takes 
+into account a 
+varying number 
+of possibilities 
+and conditions 
+which can be 
+faced by various 
+groups. 
+NA X6 
+ 
+ 
+ 
+ 
+ 
+ 
+7 Consequences: 
+Have significant 
+consequences to 
+society, 
+environment and 
+industry 
+encompassing 
+SDGs. 
+The 
+implemented 
+solution fails to 
+show any form of 
+significant impact 
+or importance. 
+Implemented 
+solution shows 
+some level of 
+importance but 
+is unable to 
+make any 
+significant 
+changes. 
+The 
+implemented 
+solution shows a 
+certain level of 
+significance but 
+can be further 
+improved to 
+make a higher 
+level of impact. 
+An impressive 
+and intuitive 
+approach to the 
+solution, 
+highlighting its 
+level of 
+significance. 
+NA X7 
+8 Inter-dependence: 
+Are high level 
+problems including 
+many parts. 
+Demonstrates a 
+simple solution 
+failing to have 
+multiple parts, 
+the level of ability 
+shown is basic 
+and lacks 
+innovation. 
+Demonstrates a 
+solution with 
+little complexity, 
+the level of 
+ability is 
+inadequate and 
+requires further 
+innovation. 
+The 
+demonstrated 
+solution shows 
+promise in 
+regards to its 
+level of 
+complexity but 
+requires further 
+improvement to 
+meet the criteria 
+of inter -
+dependence. 
+The 
+demonstrated 
+solution 
+encompasses 
+many different 
+engineering 
+aspects 
+showcasing the 
+complexity a nd 
+inter-
+dependence of 
+the solution 
+NA X8 
+9 Judgement: 
+Require judgement 
+in decision making 
+The presented 
+solution is 
+straightforward 
+and involves no 
+judgement in 
+decision making 
+An inadequate 
+level of thought 
+is put behind 
+the presented 
+solution and 
+requires little 
+judgement 
+when making a 
+decision. 
+Presented 
+solution requires 
+a moderate level 
+of judgment 
+when making 
+decisions. 
+Presented 
+solution involves 
+a significant level 
+of judgement in 
+decision making. 
+NA X9 
+Page 6 of 8 
+ 
+Total (=
+𝑿𝟏+𝑿𝟐+𝑿𝟑+𝑿𝟒
+𝟐𝟎 х 𝑾𝒆𝒊𝒈𝒉𝒕 𝒐𝒇 𝒕𝒉𝒆 𝑪𝑬𝑷)   
+ 
+ 
+7. CEP Mapping to CLO  and WP, And Course CLO to Bloom’s Taxonomy, 
+PLO, WK, and SDG  
+ 
+Course Name Course 
+Code 
+CLO 
+WP 
+Domain / 
+Taxono
+my Level 
+PLO 
+WK 
+SDG 
+Fundamental of 
+Databases CS2011 
+CLO- 2, 
+CLO-3 WP1, WP2, 
+WP3, WP4 
+Cognitive 
+Level 3 
+(C3) 
+PLO-1, 
+PLO-5 WK4,
+WK6 
+Goal 
+9 
+ 
+ 
+7.1. Course Learning Outcomes CLO’s 
+ 
+S. No. CLO Domain Taxonomy 
+Level  
+1 
+Explain the basic concepts and uses of 
+databases with different  applications/ 
+Systems. 
+Cognitive  
+ 
+2  
+2 
+Build code o f Structured Query Language 
+(SQL) for database definition and  
+manipulation using any DBMS. 
+Cognitive  
+3 
+ 
+3 
+Describe and apply different stages of 
+database development using different data  
+models 
+Cognitive  
+ 
+3  
+4 Explain database programming techniques Cognitive  2  
+ 
+7.2. Program Learning Outcomes PLO’s 
+ 
+PLO Attributes  
+1 Engineering Knowledge  
+2 Problem Analysis  
+3 Design/Development of Solutions  
+4 Investigation  
+5 Modern Tool Usage  
+6 The Engineer and Society  
+7 Environment and Sustainability  
+8 Ethics  
+9 Individual and Team Work  
+10 Communication  
+11 Project Management  
+Page 7 of 8 
+ 
+12 Lifelong Learning  
+ 
+7.3. Knowledge and Attributes Profile 
+ 
+Code Description  
+WK1 A systematic, theory-based understanding of the natural sciences applicable to the 
+discipline and awareness of relevant social sciences.  
+WK2 
+Conceptually-based mathematics, numerical analysis, data analysis, statistics and 
+formal aspects of computer and information science to support detailed analysis 
+and modelling applicable to the discipline. 
+ 
+WK3 A systematic, theory-based formulation of engineering fundamentals required in 
+the relevant engineering discipline.  
+WK4 
+Engineering specialist knowledge that provides theoretical frameworks and 
+bodies of knowledge for the accepted practice areas in the engineering discipline; 
+much is at the forefront of the discipline. 
+ 
+WK5 
+Knowledge, including efficient resource use, environmental impacts, whole-life 
+cost, re-use of resources, net zero carbon, and similar concepts, that supports 
+engineering design and operations in a practice area. 
+ 
+WK6 Knowledge of engineering practice (technology) in the practice areas in the 
+engineering discipline.  
+WK7 
+Knowledge of the role of engineering in society and identified issues in 
+engineering practice in the discipline, such as the professional responsibility of an 
+engineer to public safety and sustainable development (Represented by the 17 UN 
+Sustainable Development Goals (UN-SDG)). 
+ 
+WK8 
+Engagement with selected knowledge in the current research literature of the 
+discipline, awareness of the power of critical thinking and creative approaches to 
+evaluate emerging issues. 
+ 
+WK9 
+Ethics, inclusive behavior and conduct. Knowledge of professional ethics, 
+responsibilities, and norms of engineering practice. Awareness of the need for 
+diversity by reason of ethnicity, gender, age, physical ability etc. with mutual 
+understanding and respect, and of inclusive attitudes. 
+ 
+ 
+7.4. United Nations Social Development Goals SDG’s 
+ 
+Goal No Goal  
+1 No poverty  
+2 Zero hunger (No hunger)  
+3 Good health and well-being  
+4 Quality education  
+5 Gender equality  
+6 Clean water and sanitation  
+7 Affordable and clean energy  
+8 Decent work and economic growth  
+9 Industry, Innovation and Infrastructure  
+10 Reduced inequality  
+Page 8 of 8 
+ 
+11 Sustainable cities and communities  
+12 Responsible consumption and production  
+13 Climate action  
+14 Life below water  
+15 Life on land  
+16 Peace, justice and strong institutions  
+17 Partnership for the goals  
+ 

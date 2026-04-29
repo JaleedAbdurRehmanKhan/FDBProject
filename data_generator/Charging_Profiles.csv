@@ -1,0 +1,5 @@
+Profile_ID,Profile_Name,Target_Voltage,Max_Current,Recommended_Temperature_Range
+P-01,Ultra-Fast Charge,4.2,200,20-40
+P-02,Trickle Charge,3.8,10,10-45
+P-03,Cell Balancing,3.6,5,15-35
+P-04,Thermal Safe Mode,3.4,0,0-25
